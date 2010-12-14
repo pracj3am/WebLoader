@@ -47,9 +47,7 @@ Presenter:
 			$css->tempUri = Environment::getVariable("baseUri") . "data/webtemp";
 			$css->tempPath = WWW_DIR . "/data/webtemp";
 
-			$css->filters[] = function ($code) {
-				return cssmin::minify($code, "remove-last-semicolon");
-			};
+			$css->filters[] = new \Minify\CSS\Compressor;
 
 			return $css;
 		}

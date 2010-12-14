@@ -1,7 +1,8 @@
 <?php
 
-namespace WebLoader;
+namespace WebLoader\Filters;
 
+use WebLoader\WebLoader;
 use Nette\Environment;
 use Nette\String;
 
@@ -11,7 +12,7 @@ use Nette\String;
  * @author Jan Marek
  * @license MIT
  */
-class CssUrlsFilter extends \Nette\Object {
+class CssUrls extends \Nette\Object {
 	
 	/**
 	 * Make relative url absolute
@@ -36,8 +37,6 @@ class CssUrlsFilter extends \Nette\Object {
 		} else {
 			$path = $basePath . substr($sourcePath, strlen($docroot)) . DIRECTORY_SEPARATOR . $url;
 		}
-
-		//$path = self::cannonicalizePath($path);
 
 		return $quote === '"' ? addslashes($path) : $path;
 	}
@@ -65,13 +64,12 @@ class CssUrlsFilter extends \Nette\Object {
 
 
 	/**
-	 * Invoke filter
-	 * @param string code
-	 * @param WebLoader loader
-	 * @param string file
+	 * Replace urls in css code using callback
+	 * @param string $code
+	 * @param callback $callback
 	 * @return string
 	 */
-	public function __invoke($code, WebLoader $loader, $file = null)
+	protected function replaceUrls($code, $callback)
 	{
 		// thanks to kravco
 		$regexp = '~
@@ -93,10 +91,29 @@ class CssUrlsFilter extends \Nette\Object {
 
 		return preg_replace_callback(
 			$regexp,
-			function ($matches) use ($loader, $file) {
-				return "url('" . CssUrlsFilter::absolutizeUrl($matches[2], $matches[1], $file, $loader->sourcePath) . "')";
-			},
+			$callback,
 			$code
+		);
+
+	}
+
+
+	/**
+	 * Invoke filter
+	 * @param string code
+	 * @param WebLoader loader
+	 * @param string file
+	 * @return string
+	 */
+	public function __invoke($code, WebLoader $loader, $file = null)
+	{
+		$self = \get_called_class();
+		return $this->replaceUrls(
+			$code,
+			function ($matches) use ($loader, $file, $self) {
+				return "url('" . $self::absolutizeUrl($matches[2], $matches[1], $file, $loader->sourcePath) . "')";
+			},
+			$loader, $file
 		);
 	}
 	

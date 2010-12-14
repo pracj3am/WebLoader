@@ -16,6 +16,7 @@ Presenter:
 	use WebLoader\JavaScriptLoader;
 	use WebLoader\VariablesFilter;
 	use WebLoader\CssLoader;
+	use WebLoader\Filters;
 
 	abstract class BasePresenter extends Presenter {
 
@@ -33,6 +34,7 @@ Presenter:
 				"texylaFilesPath" => $this->link(":Texyla:listFiles"),
 				"texylaFilesUploadPath" => $this->link(":Texyla:upload"),
 			));
+			$js->filters[] = new Filters\ClosureCompiler;
 
 			return $js;
 		}

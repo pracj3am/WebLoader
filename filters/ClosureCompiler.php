@@ -28,7 +28,7 @@ class ClosureCompiler
         $result = \curl_exec($ch);
         \curl_close($ch);
 
-        if ($result === FALSE) {
+        if ($result === FALSE || $result === "\x0a") {//connection or syntax error
             return $code;
         }
         return $result;
